@@ -476,7 +476,7 @@
         </div>
       </div>
 
-      <!-- Manual coordinates input -->
+      <!-- Manual coordinates input --><!--
       <div class="panel">
         <div class="panel-title">Manual Coordinates</div>
         <div class="panel-body">
@@ -484,7 +484,7 @@
           <button class="sidebar-btn" onclick="applyManualCoords()" style="padding:6px;font-size:11px">APPLY</button>
           
         </div>
-      </div>
+      </div>-->
 
 
 
@@ -558,10 +558,10 @@
           </div>
         </div>
 
-      <!-- Food overlays -->
+      <!-- Land Food overlays -->
       <div class="panel">
         <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center">
-          <span>Food Overlays</span>
+          <span>Land Food Overlays</span>
           <input type="checkbox" id="check-all-food" onchange="toggleAllFoodOverlays()" style="width:20px;height:20px;cursor:pointer;accent-color:#56dd56">
         </div>
         <div class="panel-body" style="display:flex;flex-wrap:wrap;gap:6px">
@@ -574,24 +574,37 @@
           <button class="sidebar-btn" id="toggle-chicken" onclick="toggleChicken()" style="width:calc(25% - 5px);padding:6px;font-size:11px">
             CHICKEN
           </button>
-          <button class="sidebar-btn" id="toggle-crab" onclick="toggleCrab()" style="width:calc(25% - 5px);padding:6px;font-size:11px">
-            CRAB
-          </button>
           <button class="sidebar-btn" id="toggle-deer" onclick="toggleDeer()" style="width:calc(25% - 5px);padding:6px;font-size:11px">
             DEER
           </button>
-          <button class="sidebar-btn" id="toggle-frog" onclick="toggleFrog()" style="width:calc(25% - 5px);padding:6px;font-size:11px">
-            FROG
-          </button>
           <button class="sidebar-btn" id="toggle-goat" onclick="toggleGoat()" style="width:calc(25% - 5px);padding:6px;font-size:11px">
             GOAT
+          </button>
+
+        </div>
+      </div>
+
+            <!-- Ocean Food overlays -->
+      <div class="panel">
+        <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Ocean Food Overlays</span>
+          <input type="checkbox" id="check-all-ocean-food" onchange="toggleAllOceanFood()" style="width:20px;height:20px;cursor:pointer;accent-color:#56dd56">
+        </div>
+        <div class="panel-body" style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="sidebar-btn" id="toggle-fish" onclick="toggleFish()" style="width:calc(25% - 5px);padding:6px;font-size:11px">
+            FISH
+          </button>
+          <button class="sidebar-btn" id="toggle-crab" onclick="toggleCrab()" style="width:calc(25% - 5px);padding:6px;font-size:11px">
+            CRAB
+          </button>
+          <button class="sidebar-btn" id="toggle-frog" onclick="toggleFrog()" style="width:calc(25% - 5px);padding:6px;font-size:11px">
+            FROG
           </button>
           <button class="sidebar-btn" id="toggle-turtle" onclick="toggleTurtle()" style="width:calc(25% - 5px);padding:6px;font-size:11px">
             TURTLE
           </button>
         </div>
       </div>
-
 
 
       <!-- Leave -->
