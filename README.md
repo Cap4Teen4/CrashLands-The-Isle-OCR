@@ -6,6 +6,8 @@
 - Working Browsers: Chrome | Edge | Firefox | OperaGx
 
 
+
+## How to Use:
 - 1.Enter your ingame name and **Create** or **Join** a room
 - 2.Share the **6-letter room code** with your **friends**
 - 3.Click **Share Screen** and **select** your **game window**
