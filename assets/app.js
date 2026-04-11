@@ -9,7 +9,7 @@
 const WS_URL = 'wss://live-isle-tracker.fly.dev';
 
 // ── Constants ──
-const MAX_PLAYERS = 8;
+const MAX_PLAYERS = 10;
 const MAX_TRAIL = 25;
 const TRAIL_EXPIRE_MS = 20 * 60 * 1000; // 20 minutes
 const WRITE_THROTTLE_MS = 500;
