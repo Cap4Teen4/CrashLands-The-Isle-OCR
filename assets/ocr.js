@@ -1,0 +1,456 @@
+// ═══════════════════════════════════════════════════════════════════
+//  The Isle - Screen Capture & OCR Pipeline (ocr.js)
+//  Screen Capture API, region selection, Tesseract.js OCR
+// ═══════════════════════════════════════════════════════════════════
+
+// ── State ──
+let mediaStream = null;
+let videoElement = null;
+let captureCanvas = null;
+let captureCtx = null;
+let cropRegion = null;
+let cropRegionBase = null; // Original crop region (for rescaling on resolution change)
+let baseVideoWidth = 0;    // Video width when region was selected
+let baseVideoHeight = 0;   // Video height when region was selected
+let ocrWorker = null;
+let ocrRunning = false;
+let lastCoords = null;
+let ocrLastSuccess = 0;
+let consecutiveRejects = 0;
+let tmpCanvas = null;   // Reusable preprocessing canvases (avoid per-frame allocation)
+let tmpCtx = null;
+let procCanvas = null;
+let procCtx = null;
+
+// ── Regex (matches server.py patterns) ──
+const LAT_RE = /Lat[:\s]*(-?[\d,]+\.?\d*)/;
+const LONG_RE = /Long[:\s]*(-?[\d,]+\.?\d*)/;
+const ALT_RE = /Alt[:\s]*(-?[\d,]+\.?\d*)/;
+
+// ── Screen Capture ──
+
+async function startScreenCapture() {
+  try {
+    mediaStream = await navigator.mediaDevices.getDisplayMedia({
+      video: { cursor: 'never' },
+    });
+  } catch (err) {
+    if (err.name === 'NotAllowedError') {
+      alert('Screen sharing was denied. Click "Share Screen" to try again.');
+    } else {
+      alert('Screen capture failed: ' + err.message);
+    }
+    return false;
+  }
+
+  const videoTrack = mediaStream.getVideoTracks()[0];
+
+  // Handle user stopping share via browser UI
+  videoTrack.addEventListener('ended', () => {
+    stopOCR();
+    const btn = document.getElementById('capture-btn');
+    btn.textContent = 'SHARE SCREEN';
+    btn.classList.remove('active-capture');
+    updateOCRStatus('offline');
+  });
+
+  // Hidden video element to receive stream
+  videoElement = document.createElement('video');
+  videoElement.srcObject = mediaStream;
+  videoElement.autoplay = true;
+  videoElement.muted = true;
+
+  await new Promise(resolve => {
+    videoElement.onloadedmetadata = resolve;
+  });
+  await videoElement.play();
+
+  // Offscreen canvas for frame capture
+  captureCanvas = document.createElement('canvas');
+  captureCanvas.width = videoElement.videoWidth;
+  captureCanvas.height = videoElement.videoHeight;
+  captureCtx = captureCanvas.getContext('2d', { willReadFrequently: true });
+
+  return true;
+}
+
+function stopScreenCapture() {
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(t => t.stop());
+    mediaStream = null;
+  }
+  videoElement = null;
+  captureCanvas = null;
+  captureCtx = null;
+}
+
+// ── Region Selection (replaces setup_region.py) ──
+
+async function selectRegion() {
+  // Capture current frame
+  captureCtx.drawImage(videoElement, 0, 0);
+
+  return new Promise(resolve => {
+    const overlay = document.getElementById('region-overlay');
+    const regionCanvas = document.getElementById('region-canvas');
+    const rCtx = regionCanvas.getContext('2d');
+
+    regionCanvas.width = window.innerWidth;
+    regionCanvas.height = window.innerHeight;
+
+    // Scale captured frame to fit overlay
+    const imgW = captureCanvas.width;
+    const imgH = captureCanvas.height;
+    const scaleX = regionCanvas.width / imgW;
+    const scaleY = regionCanvas.height / imgH;
+    const scale = Math.min(scaleX, scaleY);
+    const drawW = imgW * scale;
+    const drawH = imgH * scale;
+    const offsetX = (regionCanvas.width - drawW) / 2;
+    const offsetY = (regionCanvas.height - drawH) / 2;
+
+    function drawFrame() {
+      rCtx.fillStyle = '#0a0e17';
+      rCtx.fillRect(0, 0, regionCanvas.width, regionCanvas.height);
+      rCtx.drawImage(captureCanvas, offsetX, offsetY, drawW, drawH);
+
+      // Instruction bar
+      rCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      rCtx.fillRect(0, 0, regionCanvas.width, 50);
+      rCtx.fillStyle = '#5ccfe6';
+      rCtx.font = '14px Consolas';
+      rCtx.textAlign = 'center';
+      rCtx.fillText(
+        'Click and drag to select the Asset Location region  |  ESC to cancel',
+        regionCanvas.width / 2, 30
+      );
+    }
+
+    drawFrame();
+    overlay.style.display = 'block';
+
+    let startX = 0, startY = 0, drawing = false;
+
+    function onMouseDown(e) {
+      startX = e.clientX;
+      startY = e.clientY;
+      drawing = true;
+    }
+
+    function onMouseMove(e) {
+      if (!drawing) return;
+      drawFrame();
+      // Selection rectangle
+      rCtx.strokeStyle = '#5ccfe6';
+      rCtx.lineWidth = 2;
+      rCtx.setLineDash([6, 4]);
+      rCtx.strokeRect(startX, startY, e.clientX - startX, e.clientY - startY);
+      rCtx.setLineDash([]);
+    }
+
+    function onMouseUp(e) {
+      if (!drawing) return;
+      drawing = false;
+
+      const rectX = Math.min(startX, e.clientX);
+      const rectY = Math.min(startY, e.clientY);
+      const rectW = Math.abs(e.clientX - startX);
+      const rectH = Math.abs(e.clientY - startY);
+
+      if (rectW < 50 || rectH < 20) return; // Too small
+
+      // Convert screen coords back to video coords
+      cropRegion = {
+        x: Math.max(0, Math.round((rectX - offsetX) / scale)),
+        y: Math.max(0, Math.round((rectY - offsetY) / scale)),
+        width: Math.round(rectW / scale),
+        height: Math.round(rectH / scale),
+      };
+      cropRegion.width = Math.min(cropRegion.width, imgW - cropRegion.x);
+      cropRegion.height = Math.min(cropRegion.height, imgH - cropRegion.y);
+
+      // Remember base resolution for rescaling if video dims change later
+      cropRegionBase = { ...cropRegion };
+      baseVideoWidth = captureCanvas.width;
+      baseVideoHeight = captureCanvas.height;
+
+      cleanup();
+      overlay.style.display = 'none';
+      resolve(cropRegion);
+    }
+
+    function onKeyDown(e) {
+      if (e.key === 'Escape') {
+        cleanup();
+        overlay.style.display = 'none';
+        resolve(null);
+      }
+    }
+
+    function cleanup() {
+      regionCanvas.removeEventListener('mousedown', onMouseDown);
+      regionCanvas.removeEventListener('mousemove', onMouseMove);
+      regionCanvas.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('keydown', onKeyDown);
+    }
+
+    regionCanvas.addEventListener('mousedown', onMouseDown);
+    regionCanvas.addEventListener('mousemove', onMouseMove);
+    regionCanvas.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('keydown', onKeyDown);
+  });
+}
+
+// ── Tesseract.js Init ──
+
+async function initOCR() {
+  ocrWorker = await Tesseract.createWorker('eng', 1, {
+    logger: () => {},
+  });
+  await ocrWorker.setParameters({
+    tessedit_pageseg_mode: '6',
+    tessedit_char_whitelist: '0123456789.,-:AltLaong ',
+  });
+}
+
+// ── Image Preprocessing (matches server.py pipeline) ──
+
+function preprocessFrame() {
+  const curW = videoElement.videoWidth;
+  const curH = videoElement.videoHeight;
+
+  // Resize canvas & rescale crop region if video resolution changed
+  if (curW !== captureCanvas.width || curH !== captureCanvas.height) {
+    console.warn(`[OCR] Video resolution changed: ${captureCanvas.width}x${captureCanvas.height} → ${curW}x${curH}`);
+    captureCanvas.width = curW;
+    captureCanvas.height = curH;
+    captureCtx = captureCanvas.getContext('2d', { willReadFrequently: true });
+
+    // Rescale crop region from base resolution to current
+    const sx = curW / baseVideoWidth;
+    const sy = curH / baseVideoHeight;
+    cropRegion = {
+      x: Math.max(0, Math.round(cropRegionBase.x * sx)),
+      y: Math.max(0, Math.round(cropRegionBase.y * sy)),
+      width: Math.max(4, Math.round(cropRegionBase.width * sx)),
+      height: Math.max(4, Math.round(cropRegionBase.height * sy)),
+    };
+    cropRegion.width = Math.min(cropRegion.width, curW - cropRegion.x);
+    cropRegion.height = Math.min(cropRegion.height, curH - cropRegion.y);
+  }
+
+  // Draw current video frame
+  captureCtx.drawImage(videoElement, 0, 0);
+
+  // Get cropped region
+  const imageData = captureCtx.getImageData(
+    cropRegion.x, cropRegion.y,
+    cropRegion.width, cropRegion.height
+  );
+
+  // Grayscale → threshold → invert
+  // The game's teal text is ~150-220 brightness; background is ~20-50
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    const binary = gray > 100 ? 255 : 0;
+    const inverted = 255 - binary;
+    data[i] = data[i + 1] = data[i + 2] = inverted;
+    data[i + 3] = 255;
+  }
+
+  // Put processed pixels on temp canvas (reuse across frames)
+  if (!tmpCanvas) {
+    tmpCanvas = document.createElement('canvas');
+    tmpCtx = tmpCanvas.getContext('2d');
+  }
+  if (tmpCanvas.width !== cropRegion.width || tmpCanvas.height !== cropRegion.height) {
+    tmpCanvas.width = cropRegion.width;
+    tmpCanvas.height = cropRegion.height;
+  }
+  tmpCtx.putImageData(imageData, 0, 0);
+
+  // Upscale 2x with nearest neighbor (reuse across frames)
+  const needW = cropRegion.width * 2;
+  const needH = cropRegion.height * 2;
+  if (!procCanvas) {
+    procCanvas = document.createElement('canvas');
+    procCtx = procCanvas.getContext('2d');
+    procCtx.imageSmoothingEnabled = false;
+  }
+  if (procCanvas.width !== needW || procCanvas.height !== needH) {
+    procCanvas.width = needW;
+    procCanvas.height = needH;
+    procCtx.imageSmoothingEnabled = false;
+  }
+  procCtx.drawImage(tmpCanvas, 0, 0, needW, needH);
+
+  return procCanvas;
+}
+
+// ── Coordinate Parsing (matches server.py regex) ──
+
+// Adjust this value if your OCR map is consistently north/south offset.
+// positive moves all parsed positions 'south' on the in-game map display.
+
+//const LAT_CORRECTION = -11500; // tune in +/- steps: e.g. 5000, 10000
+//const LONG_CORRECTION = -4250; // tune in +/- steps: e.g. 5000, 10000
+
+function parseCoords(text) {
+  const latMatch = text.match(LAT_RE);
+  const longMatch = text.match(LONG_RE);
+
+  if (!latMatch || !longMatch) return null;
+
+  let lat = parseFloat(latMatch[1].replace(/,/g, ''));
+  let long = parseFloat(longMatch[1].replace(/,/g, ''));
+
+  if (isNaN(lat) || isNaN(long)) return null;
+
+  // ❌ reject insane values
+  if (Math.abs(lat) > 1000000 || Math.abs(long) > 1000000) return null;
+
+  // ✅ 🔥 SCALE DOWN TO MATCH YOUR MAP
+  lat = lat / 1000;
+  long = long / 1000;
+
+  let alt = null;
+  const altMatch = text.match(ALT_RE);
+  if (altMatch) {
+    alt = parseFloat(altMatch[1].replace(/,/g, ''));
+    if (isNaN(alt)) alt = null;
+  }
+
+  return { lat, long, alt };
+}
+
+function worldToMap(lat, long) {
+  // 🧠 These are typical The Isle world bounds
+  const MIN_LAT = -512000;
+  const MAX_LAT =  512000;
+  const MIN_LONG = -512000;
+  const MAX_LONG =  512000;
+
+  // 🔥 IMPORTANT: match this to YOUR map image resolution
+  const mapWidth = 4096;
+  const mapHeight = 4096;
+
+  // Normalize
+  const xNorm = (long - MIN_LONG) / (MAX_LONG - MIN_LONG);
+  const yNorm = (lat - MIN_LAT) / (MAX_LAT - MIN_LAT);
+
+  // Convert to pixels
+  const x = xNorm * mapWidth;
+
+  // ⚠️ Flip Y axis (THIS is critical)
+  const y = (1 - yNorm) * mapHeight;
+
+  return { x, y };
+}
+
+
+// ── OCR Loop ──
+
+async function ocrLoop() {
+  if (!ocrRunning || !cropRegion || !ocrWorker || !videoElement) return;
+
+  try {
+    const processedCanvas = preprocessFrame();
+    const { data: { text } } = await ocrWorker.recognize(processedCanvas);
+
+    const coords = parseCoords(text);
+
+    if (coords) {
+      // Jump rejection (matches server.py threshold of 50000)
+      let valid = true;
+      if (lastCoords) {
+        if (Math.abs(coords.lat - lastCoords.lat) > 50000) valid = false;
+        if (Math.abs(coords.long - lastCoords.long) > 50000) valid = false;
+      }
+
+      if (valid) {
+        consecutiveRejects = 0;
+        lastCoords = coords;
+        ocrLastSuccess = Date.now();
+        updateMyPosition(coords.lat, coords.long, coords.alt);
+        updateOCRStatus('active');
+      } else {
+        consecutiveRejects++;
+        // After 3 consecutive rejects (~0.6s at 5Hz), assume legitimate teleport (death/respawn/new server)
+        if (consecutiveRejects >= 3) {
+          consecutiveRejects = 0;
+          clearMyTrail();
+          lastCoords = coords;
+          ocrLastSuccess = Date.now();
+          updateMyPosition(coords.lat, coords.long, coords.alt);
+          updateOCRStatus('active');
+        }
+      }
+    }
+  } catch (err) {
+    // Silent — OCR fails when Tab menu is closed (expected)
+  }
+
+  // Update status based on time since last success
+  const elapsed = Date.now() - ocrLastSuccess;
+  if (ocrLastSuccess > 0 && elapsed > 5000) {
+    updateOCRStatus('stale');
+  }
+
+  // Schedule next iteration (~5 Hz, self-adjusting)
+  if (ocrRunning) {
+    setTimeout(ocrLoop, 200);
+  }
+}
+
+// ── Public API ──
+
+async function beginCapture() {
+  const btn = document.getElementById('capture-btn');
+
+  // Check browser support
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+    alert('Screen capture requires a modern browser with HTTPS.');
+    return;
+  }
+
+  btn.textContent = 'Starting capture...';
+
+  const captureOk = await startScreenCapture();
+  if (!captureOk) {
+    btn.textContent = 'SHARE SCREEN';
+    return;
+  }
+
+  btn.textContent = 'Select region...';
+  const region = await selectRegion();
+  if (!region) {
+    stopScreenCapture();
+    btn.textContent = 'SHARE SCREEN';
+    return;
+  }
+
+  btn.textContent = 'Loading OCR engine...';
+  if (!ocrWorker) {
+    await initOCR();
+  }
+
+  btn.textContent = 'OCR ACTIVE';
+  btn.classList.add('active-capture');
+  updateOCRStatus('offline'); // Will switch to 'active' on first successful read
+
+  ocrRunning = true;
+  ocrLoop();
+}
+
+function stopOCR() {
+  ocrRunning = false;
+  stopScreenCapture();
+  cropRegion = null;
+  cropRegionBase = null;
+  lastCoords = null;
+  tmpCanvas = null;
+  tmpCtx = null;
+  procCanvas = null;
+  procCtx = null;
+}
