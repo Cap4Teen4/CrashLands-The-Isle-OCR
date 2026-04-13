@@ -38,7 +38,7 @@
   }
   .lobby-card {
     background: #100a17 ;
-    border: 1px solid #1a3a4a;
+    border: 1.5px solid #02ffea;
     border-radius: 8px;
     padding: 40px;
     width: 1000px;
@@ -51,25 +51,48 @@
     margin-bottom: 4px;
   }
   .lobby-card .subtitle {
-    font-size: 12px;
-    color: #7fdbca;
-    letter-spacing: 2px;
-    margin-bottom: 30px;
-    opacity: 0.7;
+      font-size: 12px;
+      letter-spacing: 2px;
+      margin-bottom: 30px;
+      opacity: 0.9;
+
+      background: linear-gradient(45deg, #00ffff, #4c00ff, #00ffff);
+      background-size: 300% 300%;
+      animation: gradientShift2 8s ease-in-out infinite;
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
   }
+
   .lobby-card input {
-    background: #100a17;
-    border: 1px solid #1a3a4a;
-    color: #7fdbca;
-    padding: 10px 14px;
-    width: 100%;
-    margin-bottom: 12px;
-    font-family: inherit;
-    font-size: 14px;
-    border-radius: 4px;
-    text-align: center;
+      background: #100a17;
+
+      background-image: linear-gradient(45deg, #00ffff, #4c00ff, #00ffff);
+      background-size: 300% 300%;
+      animation: gradientShift2 8s ease-in-out infinite;
+
+      -webkit-background-clip: text;
+      background-clip: text;
+
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+
+
+      padding: 10px 14px;
+      width: 100%;
+      margin-bottom: 12px;
+
+      font-family: inherit;
+      font-size: 14px;
+      border-radius: 4px;
+      text-align: center;
+
+      border: 1.5px solid #02ffea;
   }
-  .lobby-card input:focus { outline: none; border-color: #5ccfe6; }
+
+
+  .lobby-card input:focus { outline: none; border: 1.5px solid #02ffea; }
   .lobby-card input::placeholder { color: #334; }
   .btn-row {
     display: flex;
@@ -79,8 +102,8 @@
   .btn {
     flex: 1;
     background: #100a17;
-    color: #5ccfe6;
-    border: 1px solid #2a5a8a;
+    color: #5ce668;
+      border: 1.5px solid #02ffea;
     padding: 12px 14px;
     cursor: pointer;
     font-family: inherit;
@@ -96,6 +119,62 @@
     color: #e06c75;
   }
   .btn-danger:hover { background: #100a17 ; }
+
+  .btn2 {
+      flex: 1;
+      background: #100a17;
+
+      /* ❌ remove this (invalid) */
+      color: transparent;
+
+      background-image: linear-gradient(45deg, #00ffff, #4c00ff, #00ffff);
+      background-size: 300% 300%;
+      animation: gradientShift2 8s ease-in-out infinite;
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+      border: 1.5px solid #02ffea;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      transition: transform 0.15s;
+  }
+
+  .btn2:hover {       
+      flex: 1;
+      background: #100a17;
+
+      /* ❌ remove this (invalid) */
+      color: transparent;
+
+      background-image: linear-gradient(45deg, #00ffff, #4c00ff, #00ffff);
+      background-size: 300% 300%;
+      animation: gradientShift2 8s ease-in-out infinite;
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+      border: 1.5px solid #02ffea;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      transition: transform 0.15s; 
+    }
+  .btn2-danger {
+    background: #100a17;
+    border-color: #6a2a2a;
+    color: #e06c75;
+  }
+  .btn2-danger:hover { background: #301111 ; }
   #join-section {
     display: none;
     margin-top: 12px;
@@ -118,14 +197,14 @@
   #tracker.active { display: flex; }
   #lobby.hidden { display: none; }
 
-  #header {
+ #header {
     background: #100a17 ;
-    border-bottom: 1px solid #1a3a4a;
-    padding: 8px 20px;
+    border-bottom: 1.5px solid #02ffea;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-height: 42px;
+    padding: 6px 16px;
+    min-height: 34px;
   }
   .header-left {
     display: flex;
@@ -133,13 +212,31 @@
     gap: 16px;
   }
   #header h1 {
-    font-size: 14px;
-    color: #5ccfe6;
-    letter-spacing: 2px;
+      flex: 1;
+      background: #100a17;
+
+      /* ❌ remove this (invalid) */
+      color: transparent;
+
+      background-image: linear-gradient(45deg, #00ffff, #4c00ff, #00ffff);
+      background-size: 300% 300%;
+      animation: gradientShift2 6s ease-in-out infinite;
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      padding: 1;
+      margin: 0;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      transition: transform 0.15s;
   }
   .room-badge {
     background: #100a17 ;
-    border: 1px solid #1a3a4a;
+    border: 1.5px dotted #ff0202c0;
     padding: 3px 10px;
     border-radius: 3px;
     font-size: 13px;
@@ -148,9 +245,9 @@
     cursor: pointer;
     transition: border-color 0.15s;
   }
-  .room-badge:hover { border-color: #8c32df; }
+  .room-badge:hover { border-color: #1fc6fa; }
   .room-badge .copy-hint {
-    font-size: 9px;
+    font-size: 12px;
     color: #1fc6fa;
     letter-spacing: 0;
     margin-left: 6px;
@@ -186,7 +283,7 @@
   #sidebar {
     width: 280px;
     background: #100a17 ;
-    border-left: 1px solid #1a3a4a;
+    border: 1.5px solid #02ffea;
     padding: 15px;
     overflow-y: auto;
     display: flex;
@@ -194,7 +291,7 @@
     gap: 12px;
   }
   .panel {
-    border: 1px solid #1a3a4a;
+    border: 1.5px solid #02ffea;
     border-radius: 4px;
     overflow: hidden;
   }
@@ -223,8 +320,8 @@
     font-size: 14px;
   }
   .player-dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -253,8 +350,8 @@
   /* OCR dot */
   .ocr-dot {
     display: inline-block;
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     margin-left: 6px;
     vertical-align: center;
@@ -288,7 +385,7 @@
   .sidebar-btn {
     background: #100a17 ;
     color: #5ccfe6;
-    border: 1px solid #2a5a8a;
+    border: 1.5px solid #02ffea;
     padding: 8px;
     cursor: pointer;
     font-family: inherit;
@@ -324,19 +421,32 @@
     inset: 0;
     z-index: 9999;
     background: #100a17;
+    
     cursor: crosshair;
   }
   #region-canvas {
     width: 100%;
     height: 100%;
   }
-    .hero-subtitles {
+
+@keyframes gradientShift2 {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+.hero-subtitles {
     display: inline-block;
 
-    background: linear-gradient(135deg, #00f5ff 0%, #7c3aed 25%, #ff0080);
+    background: linear-gradient(45deg, #00ffff, #4c00ff, #00ffff);
     background-size: 300% 300%; /* 🔥 makes it move */
 
-    animation: gradientMove 6s ease infinite, heroBadgePulse 2s ease-in-out infinite, heroBadgeFloat 8s ease-in-out infinite;
+    animation: gradientMove 1s ease infinite, heroBadgePulse 2s ease-in-out infinite, gradientShift2 8s ease-in-out infinite;
     padding: 1rem 2.5rem;
     border-radius: 50px;
     font-weight: 800;
@@ -383,6 +493,7 @@
         inset 0 1px 0 rgba(0, 0, 0, 0.15),
         0 10px 30px rgba(0, 0, 0, 0.25);
 }
+
 </style>
 </head>
 <body>
@@ -419,15 +530,15 @@
         </div>
     </div>
 
-    <img src="main.png" alt="Live Isle Tracker demo" style="width:100%;border-radius:6px;margin:15px 0;border:1px solid #1a3a4a;opacity:0.9">
+    <img src="main.png" alt="Live Isle Tracker demo" style="width:100%;border-radius:6px;margin:15px 0;border: 1.5px solid #02ffea;">
     <input type="text" id="player-name" maxlength="16" placeholder="Your name" autofocus>
     <div class="btn-row">
-      <button class="btn" id="create-btn" onclick="createRoom()">CREATE ROOM</button>
-      <button class="btn" id="show-join-btn" onclick="showJoinInput()">JOIN ROOM</button>
+      <button class="btn2" id="create-btn" onclick="createRoom()">CREATE ROOM</button>
+      <button class="btn2" id="show-join-btn" onclick="showJoinInput()">JOIN ROOM</button>
     </div>
     <div id="join-section">
       <input type="text" id="room-code-input" maxlength="6" placeholder="CODE">
-      <button class="btn" style="margin-top:8px" onclick="joinRoom()">JOIN</button>
+      <button class="btn2" style="margin-top:8px" onclick="joinRoom()">JOIN</button>
     </div>
     <div id="lobby-error"></div>
     <div style="margin-top:20px">
@@ -452,12 +563,12 @@
 <div id="tracker">
   <div id="header">
     <div class="header-left">
-      <h1>The Isle: CrashLands OCR Tracker <span class="live-badge"><span class="live-badge-dot"></span></span></h1>
+      <h1>The Isle: CrashLands <br>Pack OCR Map Tracker <span class="live-badge"><span class="live-badge-dot"></span></span></h1>
       <div class="room-badge" id="room-badge" onclick="copyRoomCode()" title="Click to copy">
         <span id="room-code-display">------</span>
         <span class="copy-hint">copy</span>
       </div>
-      <span id="hide-code-btn" onclick="toggleCodeVisibility(event)" title="Hide/show room code" style="cursor:pointer;font-size:14px;color:#db109e;margin-left:4px">&#128065;</span>
+      <span id="hide-code-btn" onclick="toggleCodeVisibility(event)" title="Hide/show room code" style="cursor:pointer;font-size:20px;color:#5ccfe6;margin-left:2px">&#128065;</span>
     </div>
     <div>
       <span id="status">Connecting...</span>
