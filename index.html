@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Isle: CrashLands | Pack OCR Map Tracker</title>
+<title>Live Isle Tracker - Real-Time Multiplayer Map for The Isle</title>
 <meta name="description" content="Find your friends in The Isle. Join a room, press Tab, and see everyone's location on a shared live map. Free, no installs needed. Works in Chrome and Edge.">
 <meta name="keywords" content="The Isle, Isle tracker, dinosaur game, multiplayer map, live map, position tracker, find friends, The Isle Evrima">
 <meta property="og:title" content="Live Isle Tracker">
@@ -32,6 +32,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    
     min-height: 100vh;
     overflow-y: auto;
     padding: 20px 0;
@@ -43,6 +44,7 @@
     padding: 40px;
     width: 1000px;
     text-align: center;
+    
   }
   .lobby-card h1 {
     font-size: 18px;
@@ -493,6 +495,33 @@
         inset 0 1px 0 rgba(0, 0, 0, 0.15),
         0 10px 30px rgba(0, 0, 0, 0.25);
 }
+.gloss {
+  position: relative;
+  overflow: hidden;
+
+  background: rgba(10, 10, 14, 0.6);
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(0, 255, 255, 0.15);
+}
+.gloss::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+
+  background: linear-gradient(
+    120deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 60%
+  );
+
+  transform: rotate(10deg);
+  pointer-events: none;
+}
 
 </style>
 </head>
@@ -500,10 +529,10 @@
 
 <!-- ── Lobby View ── -->
 <div id="lobby">
-  <div class="lobby-card">
+  <div class="lobby-card header-icon">
     <div class="hero-subtitles"><h1>The Isle:<br> CrashLands</h1></div>
 
-    <h1><span class="live-badge"> <span style="font-size:14px;color:#5ccfe6">OCR ReaderStatus</span><span style="font-size:14px;color:#e65cc4">:</span> <br> 
+    <h1><span class="live-badge"> <span style="font-size:18px;color:#5ccfe6">OCR ReaderStatus</span><span style="font-size:14px;color:#e65cc4">:</span> <br> 
       <span class="live-badge"> <span style="font-size:16px;color:#ff0000">Live:</span> <span class="live-badge-dot"></span> </span></h1> <br>
 
 
@@ -526,6 +555,7 @@
                     <strong>- Firefox</strong><br>
                     <strong>- OperaGx</strong><br>
                 </p>
+                
             </div>
         </div>
     </div>
@@ -562,7 +592,7 @@
 <!-- ── Tracker View ── -->
 <div id="tracker">
   <div id="header">
-    <div class="header-left">
+    <div class="header-left gloss">
       <h1>The Isle: CrashLands <br>Pack OCR Map Tracker <span class="live-badge"><span class="live-badge-dot"></span></span></h1>
       <div class="room-badge" id="room-badge" onclick="copyRoomCode()" title="Click to copy">
         <span id="room-code-display">------</span>
@@ -570,6 +600,15 @@
       </div>
       <span id="hide-code-btn" onclick="toggleCodeVisibility(event)" title="Hide/show room code" style="cursor:pointer;font-size:20px;color:#5ccfe6;margin-left:2px">&#128065;</span>
     </div>
+        <div style="font-size:12px;color:#8c32df;line-height:1.6;padding:4px 2px">
+        <span style="color:#f09917">1.</span> Click Share Screen &amp; select your game window<br>
+        <span style="color:#f09917">2.</span> Draw a box around the <span style="color:#db109e">Asset Location</span> area<br>
+      </div>
+      <div style="font-size:12px;color:#8c32df;line-height:1.6;padding:4px 2px">
+      <span style="color:#f09917">3.</span> Press </span><span style="color:#db109e">Tab</span> in-game to sync your position<br>
+      <span style="color:#f09917">4.</span> <span style="color:#5ccfe6">Right-click</span> on the map to set a waypoint for friends<br>
+      </div>
+
     <div>
       <span id="status">Connecting...</span>
       <span id="connection-status"></span>
@@ -580,6 +619,12 @@
       <canvas id="canvas"></canvas>
     </div>
     <div id="sidebar">
+      <!-- Screen capture button -->
+      <button class="sidebar-btn" id="capture-btn" onclick="beginCapture()">
+        SHARE SCREEN <span class="live-badge"><span class="live-badge-dot"></span></span>
+      </button>
+
+
 
       <!-- Room panel -->
       <div class="panel">
@@ -647,21 +692,6 @@
           
         </div>
       </div>
-<!--
-      <div class="panel">
-        <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center">
-          <span>Map Water Labels</span>
-          <input type="checkbox" id="check-all-water-labels" onchange="toggleAllWaterLabels()" style="width:20px;height:20px;cursor:pointer;accent-color:#56dd56">
-        </div>
-        <div class="panel-body" style="display:flex;flex-wrap:wrap;gap:6px">
-          <button class="sidebar-btn active-capture" id="toggle-water-labels" onclick="toggleWaterLabels()" style="width:calc(50% - 3px);padding:6px;font-size:11px">
-            WATER LABELS
-          </button>
-            <button class="sidebar-btn active-capture" id="toggle-lake-labels" onclick="toggleLakeLabels()" style="width:calc(50% - 3px);padding:6px;font-size:11px">
-            LAKE LABELS
-          </button>
-        </div>
-      </div>-->
 
       <!-- Overlay toggles -->
       <div class="panel">
@@ -685,10 +715,6 @@
           <button class="sidebar-btn" id="toggle-mud" onclick="toggleMud()" style="flex:1;padding:6px;font-size:11px">
             MUD
           </button>
-          <button class="sidebar-btn" id="toggle-salt" onclick="toggleSalt()" style="flex:1;padding:6px;font-size:11px">
-            SALT
-          </button>
-          
           </div>
         </div>
 
@@ -740,23 +766,27 @@
         </div>
       </div>
 
+                  <!-- EARTH WORKS -->
+      <div class="panel">
+        <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Earth-works</span>
+          <input type="checkbox" id="check-all-ocean-food" onchange="toggleAllEarthworks()" style="width:20px;height:20px;cursor:pointer;accent-color:#56dd56">
+        </div>
+        <div class="panel-body" style="display:flex;flex-wrap:wrap;gap:6px">
+          <button class="sidebar-btn" id="toggle-salt" onclick="toggleSalt()" style="width:calc(50% - 3px);padding:6px;font-size:11px">
+            SALT
+          </button>
+          <button class="sidebar-btn" id="toggle-gastro" onclick="toggleGastro()" style="width:calc(50% - 3px);padding:6px;font-size:11px">
+            GASTRO
+          </button>
+        </div>
+      </div>
 
       <!-- Leave -->
       <button class="sidebar-btn btn-danger" id="leave-btn" onclick="leaveRoom()">
         LEAVE ROOM
       </button>
-      <div style="font-size:12px;color:#8c32df;line-height:1.6;padding:4px 2px">
-        <span style="color:#f09917">1.</span> Click Share Screen &amp; select your game window<br>
-        <span style="color:#f09917">2.</span> Draw a box around the <span style="color:#db109e">Asset Location</span> area<br>
-        <span style="color:#f09917">3.</span> Press </span><span style="color:#db109e">Tab</span> in-game to sync your position<br>
-        <span style="color:#f09917">4.</span> <span style="color:#5ccfe6">Right-click</span> on the map to set a waypoint for friends
-      </div>
-      <!-- Screen capture button -->
-      <button class="sidebar-btn" id="capture-btn" onclick="beginCapture()">
-        SHARE SCREEN <span class="live-badge"><span class="live-badge-dot"></span></span>
-      </button>
-
-
+      
       <!-- Ad placeholder (hidden until AdSense approved) -->
       <div id="ad-slot" style="display:none"></div>
     </div>
