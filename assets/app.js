@@ -85,7 +85,6 @@ let showBuildingLabels = true;
 let showWaterLabels = true;
 let showExtraLabels = true;
 
-let showSalt = false;
 let showBoar = false;
 let showBunny = false;
 let showChicken = false;
@@ -97,16 +96,9 @@ let showFrog = false;
 let showCrab = false;
 let showTurtle = false;
 
-// Salt deposit locations (long × 1000, lat × 1000)
-const SALT_LOCATIONS = [
-  [-320, 315], [-136, 270], [-285, 130], [-180, 125], [-92, 37],
-  [13, 286], [35, 403], [123, 178], [55, 74], [55, 72],
-  [54, 73], [278, 57], [385, 142], [332, 519], [478, 322],
-  [457, -51], [541, -251], [420, -205], [367, -270], [468, -492],
-  [-24, -384], [49, -232], [155, -182], [236, -323], [230, -441],
-  [297, -162], [157, -53], [-20, -54], [-152, -115], [-302, -25],
-  [-395, -110],
-];
+let showSalt = false;
+let showGastro = false;
+
 // Boar sighting locations (long, lat) — extracted from Gateway Isle Map
 const BOAR_LOCATIONS = [
   //SOUTH PLAINS
@@ -153,48 +145,71 @@ const DEER_LOCATIONS = [
 [295, -398],[249, -373],[225, -387],[202, -338],
 ];
 
+
+
+
 // Crab sighting locations (long, lat) — extracted from Gateway Isle Map
 const FISH_LOCATIONS = [
-  [187, -68],[-75, -97],
+  [135, 22],[146, 44],[149, 56],[200, 67],[215, 65],[227, 144],[187, 150],[192, 165],[182, 189],[160, 194],[129, 198],
+  [187, -68],[-75, -97],[259, -95],[182, -62],[166, -30],[164, -21],[170, -13],[210, -149],[306, -105],[325, -117],[372, -183],
+  [330, -384],[345, -355],[321, -350],[356, -346],[388, -303],[485, -171],[479, -149],[464, -166],[458, -145],[466, -120],[473, -103],
+  [453, -119],[334, 37],[97, 183],[89, 188],[98, 199],[106, 219],[95, 226],[85, 228],[70, 227],[82, 210],[76, 196],[122, 255],
+  [131, 273],[146, 301],[60, 271],[63, 256],[62, 290],[22, 265],[-30, 277],[-65, 287],[-42, 229],[67, 346],
+  [-207, 207],[-212, 154],[-218, 145],[-169, 67],[-296, 7],[52, -249],[59, -240],[70, -273],[92, -252],[77, -254],[196, -65],
 ];
 // Turtle sighting locations (long, lat) — extracted from Gateway Isle Map
 const TURTLE_LOCATIONS = [
-  [348, -10], [342, -22], [364, -38], [190, 352], [330, 114],
-  [356, 140], [466, 178], [494, 142], [400, 374], [410, 432],
-  [418, 454], [182, 260], [404, 460], [260, 510], [350, 538],
-  [434, 528], [458, 468], [474, 456], [464, -46], [484, -310],
-  [454, -420], [452, -430], [428, -488], [76, -340], [-50, -540],
-  [-276, -430], [-238, -184], [-310, -220], [-452, -216], [-492, -132],
-  [-496, -102], [-492, -94], [-488, -94], [-416, -44], [-310, 122],
-  [-318, 118], [-300, 160], [-300, 160], [-258, 210], [-294, 176],
-  [-394, 226], [-294, 374], [-184, 350], [-92, 360], [-62, 378],
-  [-42, 404], [174, 292], [206, 248], [214, 174], [236, 134],
-  [488, -30], [-312, 164], [200, -70],
+[557, -150],[537, -128],[527, -106],[523, -88],[523, -67],[450, -34],[451, -17],[435, 5],[412, 1],[350, -22],[345, 59],[178, 275],[209, 327],
+[175, 358],[117, 361],[65, 376],[55, 381],[45, 390],[-6, 411],[-38, 396],[-63, 348],[-89, 343],[-177, 325],[-196, 339],[-269, 377],[-291, 348],[-349, 350],[-383, 339],
+[-317, 355],[-361, 302],[-382, 267],[-429, 269],[-418, 239],[-407, 149],[-383, 135],[-370, 131],[-347, 114],[-323, 109],[-353, 101],[-319, 88],[-337, 86],[-356, 74],
+[-348, 58],[-281, 207],[-295, 195],[-294, 177],[-306, 161],[-313, 145],[-338, 139],[-366, 40],[-391, 24],[-384, 1],[-371, -29],
 ];
 // Frog sighting locations (long, lat) — extracted from Gateway Isle Map
 const FROG_LOCATIONS = [
-  [488, -138], [508, -146], [488, -150], [332, -128], [322, -154],
-  [134, -220], [158, -168], [-196, 130], [174, 92], [-196, 130],
-  [-296, 12], [-202, 136], [-334, -92], [142, -390], [114, -230],
-  [134, -220], [160, -198], [154, -180], [154, 250], [-202, 28],
-  [168, 18], [186, 52], [206, 80], [206, 80], [168, -18],
-  [-210, 216], [76, 322], [126, 304], [130, 282], [120, 242],
-  [110, 194], [54, 262], [200, -152], [222, -154], [78, -12],
-  [320, -156], [184, -170], [218, -72], [220, -58], [148, 64],
-  [246, 94], [182, 52],
+  [98, -259],[96, -236],[67, -228],[51, -98],[349, -159],[166, -25],[167, -18],[206, 114],[-210, 229],[-208, 203],
 ];
 // Crab sighting locations (long, lat) — extracted from Gateway Isle Map
 const CRAB_LOCATIONS = [
-  [348, -12], [432, -546], [464, 178], [488, 154], [538, 262],
-  [462, 308], [502, 340], [440, 376], [416, 370], [416, 442],
-  [310, 462], [288, 490], [290, 502], [366, 550], [524, 538],
-  [556, 440], [514, 362], [468, -42], [510, -26], [426, -508],
-  [398, -468], [76, -330], [-98, -380], [-280, -322], [-264, -400],
-  [-200, -220], [-294, -156], [-452, -218], [-462, -62], [-440, -66],
-  [-290, 110], [-278, 188], [-382, 164], [-394, 182], [-466, 314],
-  [-448, 346], [-326, 370], [-234, 420], [-170, 342], [-60, 384],
-  [182, 258], [220, 152], [312, 94], [468, 98], [208, -122],
-  [212, -110], [-292, 176],
+  [243, 43],[247, 126],[311, 88],[346, 54],[349, 46],[351, 35],[355, 20],[358, 7],[352, -11],[350, -26],[369, -35],[228, 171],[197, 211],
+  [185, 222],[256, 233],[164, 189],[182, 290],[191, 342],[123, 238],[110, 242],[100, 240],[98, 252],[43, 256],[-67, 286],
+  [-80, 347],[-85, 356],[-26, 400],[78, 379],[126, 363],[-161, 285],[-152, 289],[-142, 321],[-184, 334],[-199, 348],[-287, 345],
+  [-344, 351],[-461, 267],[-424, 272],[-426, 258],[-397, 270],[-345, 135],[-379, 128],[-354, 69],[-309, 80],[-369, 38],[-295, 6],[202, -108],[210, -118],
+  [543, -138],[536, -118],[527, -103],[522, -91],[522, -76],[522, -57],[370, -274],
+];
+
+
+
+// Salt deposit locations (long × 1000, lat × 1000)
+const SALT_LOCATIONS = [
+  [120, 170], [51, 68], [9, 274], [-170, 238], [-302, 117], [-319, -29], [-103, 34], [26, 386],
+  [282, 54], [158, -57], [325, -142], [156, -175], [48, -227], [-166, -110], [468, -53], [555, -246],
+  [373, -261], [240, -313], [231, -319], [229, -423], [469, -435], [392, 132], 
+];
+const GASTRO_LOCATIONS = [
+  //Highlands
+  [-182, -66],[-171, -53],[-109, -58],[-103, -59],[-274, -105],[-244, -105],[-200, -126],[-181, -139],[-58, -163],[-46, -154],[-54, -120],[-42, -147],
+  [-34, -111],[-21, -76],[-4, -70],[-10, -93],[-2, -123],[-14, -146],[-9, -156],[-8, -162],[-12, -176],[-12, -197],[-19, -204],[-21, -220],[9, -225],
+  //Delta
+  [211, -96], [219, -98], [222, -64], [209, -62], [196, -61], [151, -16], [145, -27], [182, 8], [210, -80],[206, -75],
+  [195, -10], [208, 7], [132, 35], [143, 50], [154, 66], [180, 75], [220, 93], [252, 94],[55, -280],[193, -71],
+  [233, 65], [222, 62], [48, 187], [-142, 186], [214, 6],[108, -76],[192, -168],[176, -166],[109, -238],[80, -282],
+  //NorthPlains
+  [503, -275],[483, -294],[487, -286],[500, -281],[320, -230],[311, -220],[295, -246],[299, -285],[316, -307],[195, -375],[424, -430],
+  [299, -324],[271, -322],[383, -316],[375, -333],[355, -343],[353, -352],[333, -374],[323, -380],[231, -361],[321, -412],[439, -418],[472, -433],
+  [284, -154],[287, -152],[265, -147],[261, -168],[269, -201],[213, -242],[224, -222],[210, -259],[194, -269],[191, -273],[185, -273],[187, -289],
+  [229, -296],
+  //East-Swamp
+  [226, -49],[216, -33],[228, -29],[234, -24],[263, -55],[273, -73],[252, -92],[273, -103],[315, -101],[321, -122],[345, 43],[350, -1],
+  [425, 2],[443, -53],[463, -50],[449, -64],[443, -71],[516, -75],[522, -106],[476, -147],[535, -145],[544, -152],[521, -196],
+  [460, -190],[436, -169],[544, -204],[507, -232],
+  //Swamp
+  [51, 205], [63, 204],[54, 224],[101, 267],[113, 286],[72, 274], [35, 286], [22, 274], [65, 352], [83, 374], [109, 354], [24, 357], 
+  [169, 326], [175, 329], [165, 333], [171, 339], [81, 175], [125, 174], [129, 188], [166, 165], [-38, 312], [-75, 260], [-91, 320], [-103, 311],
+  [-64, 369],
+  //south Plains
+  [-184, 217], [-197, 238],[-201, 250],[-189, 259],[-150, 292],[-158, 319],[-190, 333],[-235, 365],[-268, 377], [-268, 377], [-390, 333], [-341, 162],
+  [-421, 278], [-418, 242], [-418, 228], [-418, 209], [-415, 172], [-414, 165], [-408, 154], [-307, 210], [-275, 201], [-198, 181], [-216, 167], [-340, 145],
+  [-286, 6], [-303, 5], [279, 9],
 ];
 
 // Map state
@@ -645,7 +660,8 @@ canvas.addEventListener('click', e => {
   const worldX = (sx - canvas.width / 2) / zoom - viewX;
   const worldY = (sy - canvas.height / 2) / zoom - viewY;
 
-  const text = `[${worldX.toFixed(0)}, ${worldY.toFixed(0)}]`;
+  // ✅ added comma after closing bracket
+  const text = `[${worldX.toFixed(0)}, ${worldY.toFixed(0)}],`;
 
   navigator.clipboard.writeText(text).then(() => {
     console.log('Copied:', text);
@@ -673,7 +689,7 @@ canvas.addEventListener('wheel', e => {
 
   zoom *= factor;
 
-  const maxZoom = 5;
+  const maxZoom = 10;
 
   // ✅ LOCK OUTSIDE BOUNDS
   zoom = Math.max(minZoom, Math.min(maxZoom, zoom));
@@ -799,22 +815,10 @@ function draw() {
     if (showSanctuaries && sanctLoaded) {
       ctx.drawImage(sanctImg, mapSX, mapSY, mapW, mapH);
     }
-    if (showSalt) {
-      for (const [lng, lat] of SALT_LOCATIONS) {
-        const [sx, sy] = worldToScreen(lng, lat);
-        ctx.fillStyle = 'rgba(255, 105, 180, 0.7)';
-        ctx.beginPath();
-        ctx.arc(sx, sy, 8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 105, 180, 0.9)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-    }
     if (showBoar) {
       for (const [lng, lat] of BOAR_LOCATIONS) {
         const [sx, sy] = worldToScreen(lng, lat);
-        ctx.font = 'bold 20px Arial';
+        ctx.font = 'bold 15px Arial';
         ctx.fillText('🐷', sx - 10, sy + 7);
       }
     }
@@ -876,6 +880,23 @@ function draw() {
         ctx.fillText('🦀', sx - 10, sy + 7);
       }
     }
+
+
+    if (showSalt) {
+      for (const [lng, lat] of SALT_LOCATIONS) {
+        const [sx, sy] = worldToScreen(lng, lat);
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText('🧂', sx - 10, sy + 7);
+      }
+    }
+    if (showGastro) {
+      for (const [lng, lat] of GASTRO_LOCATIONS) {
+        const [sx, sy] = worldToScreen(lng, lat);
+        ctx.font = 'bold 15px Arial';
+        ctx.fillText('🪨', sx - 10, sy + 7);
+      }
+    }
+
     ctx.globalAlpha = 1.0;
   }
 
@@ -1312,12 +1333,6 @@ function toggleSanctuaries() {
   btn.classList.toggle('active-capture', showSanctuaries);
 }
 
-function toggleSalt() {
-  showSalt = !showSalt;
-  const btn = document.getElementById('toggle-salt');
-  btn.classList.toggle('active-capture', showSalt);
-}
-
 function toggleMud() {
   showMud = !showMud;
   const btn = document.getElementById('toggle-mud');
@@ -1364,6 +1379,17 @@ function toggleExtraLabels() {
   showExtraLabels = !showExtraLabels;
   const btn = document.getElementById('toggle-extra-labels');
   btn.classList.toggle('active-capture', showExtraLabels);
+}
+
+function toggleSalt() {
+  showSalt = !showSalt;
+  const btn = document.getElementById('toggle-salt');
+  btn.classList.toggle('active-capture', showSalt);
+}
+function toggleGastro() {
+  showGastro = !showGastro;
+  const btn = document.getElementById('toggle-gastro');
+  btn.classList.toggle('active-capture', showGastro);
 }
 
 function toggleAllMapAreaLabels() {
@@ -1450,6 +1476,18 @@ function toggleAllOceanFood() {
 }
 
 
+function toggleAllEarthworks() {
+  const allOn = showSalt && showGastro;
+
+  showSalt = !allOn;
+  showGastro = !allOn;
+
+  document.getElementById('toggle-salt').classList.toggle('active-capture', showSalt);
+  document.getElementById('toggle-gastro').classList.toggle('active-capture', showGastro);
+  
+  document.getElementById('check-all-earth-works').checked = !allOn;
+}
+
 
 // Initialize checkbox states on page load
 function initializeCheckboxes() {
@@ -1460,6 +1498,8 @@ function initializeCheckboxes() {
 
   // 🔥 ADD THIS
   document.getElementById('check-all-ocean-food').checked = showFish && showCrab && showFrog && showTurtle;
+    // 🔥 ADD THIS
+  document.getElementById('check-all-earth-works').checked = showSalt && showGastro;
 }
 
 
