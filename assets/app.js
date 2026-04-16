@@ -99,6 +99,9 @@ let showTurtle = false;
 let showSalt = false;
 let showGastro = false;
 
+let showCrimapol = false;
+let showRedcurrant = false;
+
 // Boar sighting locations (long, lat) — extracted from Gateway Isle Map
 const BOAR_LOCATIONS = [
   //SOUTH PLAINS
@@ -177,6 +180,14 @@ const CRAB_LOCATIONS = [
   [543, -138],[536, -118],[527, -103],[522, -91],[522, -76],[522, -57],[370, -274],
 ];
 
+const REDCURRANT_LOCATIONS = [
+  [211, -96],[221, -111],[220, -89],[190, -57],[187, 57],[131, -0],[244, 58],[52, 196],
+];
+const CRIMAPOL_LOCATIONS = [
+  [-143, -44],[-120, -40],[140, -7],[184, -74],[210, -80],[225, -112],[216, 33],[207, 63],[217, 74],[192, 57],[244, 48],[149, 207],
+  [28, 291],[24, 352],[-41, 302],[330, -97],[277, -395],[124, -312],[138, -276],
+
+];
 
 
 // Salt deposit locations (long × 1000, lat × 1000)
@@ -897,6 +908,22 @@ function draw() {
       }
     }
 
+
+        if (showCrimapol) {
+      for (const [lng, lat] of CRIMAPOL_LOCATIONS) {
+        const [sx, sy] = worldToScreen(lng, lat);
+        ctx.font = 'bold 20px Arial';
+        ctx.fillText('🍁', sx - 10, sy + 7);
+      }
+    }
+    if (showRedcurrant) {
+      for (const [lng, lat] of REDCURRANT_LOCATIONS) {
+        const [sx, sy] = worldToScreen(lng, lat);
+        ctx.font = 'bold 15px Arial';
+        ctx.fillText('🍒', sx - 10, sy + 7);
+      }
+    }
+
     ctx.globalAlpha = 1.0;
   }
 
@@ -1381,6 +1408,7 @@ function toggleExtraLabels() {
   btn.classList.toggle('active-capture', showExtraLabels);
 }
 
+
 function toggleSalt() {
   showSalt = !showSalt;
   const btn = document.getElementById('toggle-salt');
@@ -1390,6 +1418,17 @@ function toggleGastro() {
   showGastro = !showGastro;
   const btn = document.getElementById('toggle-gastro');
   btn.classList.toggle('active-capture', showGastro);
+}
+
+function toggleRedcurrant() {
+  showRedcurrant = !showRedcurrant;
+  const btn = document.getElementById('toggle-redcurrant');
+  btn.classList.toggle('active-capture', showRedcurrant);
+}
+function toggleCrimapol() {
+  showCrimapol = !showCrimapol;
+  const btn = document.getElementById('toggle-crimapol');
+  btn.classList.toggle('active-capture', showCrimapol);
 }
 
 function toggleAllMapAreaLabels() {
@@ -1474,8 +1513,19 @@ function toggleAllOceanFood() {
   
   document.getElementById('check-all-ocean-food').checked = !allOn;
 }
+function toggleAllFruitsandFlowers() {
+  const allOn = showRedcurrant && showCrimapol;
 
+  showRedcurrant = !allOn;
+  showCrimapol = !allOn;
 
+  document.getElementById('toggle-fish').classList.toggle('active-capture', showFish);
+  document.getElementById('toggle-crab').classList.toggle('active-capture', showCrab);
+  document.getElementById('toggle-frog').classList.toggle('active-capture', showFrog);
+  document.getElementById('toggle-turtle').classList.toggle('active-capture', showTurtle);
+  
+  document.getElementById('check-Fuits and Flowers').checked = !allOn;
+}
 function toggleAllEarthworks() {
   const allOn = showSalt && showGastro;
 
@@ -1495,6 +1545,7 @@ function initializeCheckboxes() {
   document.getElementById('check-all-water-labels').checked = showWaterLabels && showLakeLabels;
   document.getElementById('check-all-overlays').checked = showMigration && showSanctuaries && showStructures && showPatrolZones && showMud;
   document.getElementById('check-all-food').checked = showBoar && showBunny && showChicken && showDeer && showGoat;
+  document.getElementById('check-Fuits and Flowers').checked = showRedcurrant && showCrimapol;
 
   // 🔥 ADD THIS
   document.getElementById('check-all-ocean-food').checked = showFish && showCrab && showFrog && showTurtle;
