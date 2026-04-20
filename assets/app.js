@@ -933,82 +933,89 @@ function draw() {
   const startWY = -viewY - canvas.height / 2 / zoom;
   const endWY = -viewY + canvas.height / 2 / zoom;
 
-  // Major grid — 100k game units = 100 on official map
-  const majorGrid = 50;
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.48)';
-  ctx.lineWidth = 1;
-  for (let gx = Math.floor(startWX / majorGrid) * majorGrid; gx < endWX; gx += majorGrid) {
-    const [sx] = worldToScreen(gx, 0);
-    ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, canvas.height); ctx.stroke();
-  }
-  for (let gy = Math.floor(startWY / majorGrid) * majorGrid; gy < endWY; gy += majorGrid) {
-    const [, sy] = worldToScreen(0, gy);
-    ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(canvas.width, sy); ctx.stroke();
-  }
+// Major grid — 100k game units
+const majorGrid = 50;
+ctx.strokeStyle = 'rgba(42, 201, 201, 0.35)';   // warm gold
+ctx.lineWidth = 1.25;
 
-  // Minor grid — 50k game units = 50 on official map (subdivides major grid)
-  const minorGrid = 25;
-  ctx.strokeStyle = 'rgba(44, 0, 85, 0.66)';
-  for (let gx = Math.floor(startWX / minorGrid) * minorGrid; gx < endWX; gx += minorGrid) {
-    if (gx % majorGrid === 0) continue; // skip major lines
-    const [sx] = worldToScreen(gx, 0);
-    ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, canvas.height); ctx.stroke();
-  }
-  for (let gy = Math.floor(startWY / minorGrid) * minorGrid; gy < endWY; gy += minorGrid) {
-    if (gy % majorGrid === 0) continue;
-    const [, sy] = worldToScreen(0, gy);
-    ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(canvas.width, sy); ctx.stroke();
-  }
+for (let gx = Math.floor(startWX / majorGrid) * majorGrid; gx < endWX; gx += majorGrid) {
+  const [sx] = worldToScreen(gx, 0);
+  ctx.beginPath();
+  ctx.moveTo(sx, 0);
+  ctx.lineTo(sx, canvas.height);
+  ctx.stroke();
+}
 
-  // Grid labels — major (bold white) and minor (smaller, dimmer)
-  // Major labels (every 100)
+for (let gy = Math.floor(startWY / majorGrid) * majorGrid; gy < endWY; gy += majorGrid) {
+  const [, sy] = worldToScreen(0, gy);
+  ctx.beginPath();
+  ctx.moveTo(0, sy);
+  ctx.lineTo(canvas.width, sy);
+  ctx.stroke();
+}
+
+
+// Minor grid — 50k game units
+const minorGrid = 25;
+ctx.strokeStyle = 'rgba(42, 201, 42, 0.25)';   // faint gold/espresso
+
+for (let gx = Math.floor(startWX / minorGrid) * minorGrid; gx < endWX; gx += minorGrid) {
+  if (gx % majorGrid === 0) continue;
+  const [sx] = worldToScreen(gx, 0);
+  ctx.beginPath();
+  ctx.moveTo(sx, 0);
+  ctx.lineTo(sx, canvas.height);
+  ctx.stroke();
+}
+
+for (let gy = Math.floor(startWY / minorGrid) * minorGrid; gy < endWY; gy += minorGrid) {
+  if (gy % majorGrid === 0) continue;
+  const [, sy] = worldToScreen(0, gy);
+  ctx.beginPath();
+  ctx.moveTo(0, sy);
+  ctx.lineTo(canvas.width, sy);
+  ctx.stroke();
+}
+
+// ===============================
+// MAJOR GRID LABELS (Gold + Espresso Outline)
+// ===============================
 ctx.font = 'bold 11px Fredoka One';
 ctx.textAlign = 'left';
 
 for (let gx = Math.floor(startWX / majorGrid) * majorGrid; gx < endWX; gx += majorGrid) {
   const [sx] = worldToScreen(gx, startWY);
+  const label = (gx).toFixed(0);
 
-  const label = (gx).toFixed(0); // ✅ FIXED SCALE
-
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
-  ctx.lineWidth = 2;
+  // Espresso outline
+  ctx.strokeStyle = 'rgba(20, 10, 5, 0.85)';
+  ctx.lineWidth = 3;
   ctx.strokeText(label, sx + 2, 14);
 
-  ctx.fillStyle = 'rgba(233, 141, 22, 0.63)';
+  // Gold fill
+  ctx.fillStyle = 'rgba(42, 201, 42, 0.8)';
   ctx.fillText(label, sx + 2, 14);
 }
 
-ctx.font = 'bold 11px Fredoka One';
-ctx.textAlign = 'left';
-
-for (let gx = Math.floor(startWX / majorGrid) * majorGrid; gx < endWX; gx += majorGrid) {
-  const [sx] = worldToScreen(gx, startWY);
-
-  const label = (gx).toFixed(0); // ✅ FIXED SCALE
-
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
-  ctx.lineWidth = 2;
-  ctx.strokeText(label, sx + 2, 14);
-
-  ctx.fillStyle = 'rgba(233, 141, 22, 0.63)';
-  ctx.fillText(label, sx + 2, 14);
-}
-
+// Y-axis major labels
 ctx.textAlign = 'right';
 
 for (let gy = Math.floor(startWY / majorGrid) * majorGrid; gy < endWY; gy += majorGrid) {
   const [, sy] = worldToScreen(startWX, gy);
+  const label = (gy).toFixed(0);
 
-  const label = (gy).toFixed(0); // ✅ FIXED SCALE
-
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(20, 10, 5, 0.85)';
+  ctx.lineWidth = 3;
   ctx.strokeText(label, 30, sy - 2);
 
-  ctx.fillStyle = 'rgba(233, 141, 22, 0.63)';
+  ctx.fillStyle = 'rgba(42, 201, 201, 0.8)';
   ctx.fillText(label, 30, sy - 2);
 }
 
+
+// ===============================
+// MINOR GRID LABELS (Dim Gold)
+// ===============================
 ctx.font = '9px Fredoka One';
 ctx.textAlign = 'left';
 
@@ -1016,30 +1023,31 @@ for (let gx = Math.floor(startWX / minorGrid) * minorGrid; gx < endWX; gx += min
   if (gx % majorGrid === 0) continue;
 
   const [sx] = worldToScreen(gx, startWY);
+  const label = (gx).toFixed(0);
 
-  const label = (gx).toFixed(0); // ✅ FIXED SCALE
-
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+  // Espresso outline (lighter)
+  ctx.strokeStyle = 'rgba(20, 10, 5, 0.6)';
   ctx.lineWidth = 2;
   ctx.strokeText(label, sx + 2, 14);
 
-  ctx.fillStyle = 'rgba(228, 13, 235, 0.6)';
+  // Dim gold fill
+  ctx.fillStyle = 'rgba(34, 224, 224, 0.8)';
   ctx.fillText(label, sx + 2, 14);
 }
+
 ctx.textAlign = 'right';
 
 for (let gy = Math.floor(startWY / minorGrid) * minorGrid; gy < endWY; gy += minorGrid) {
   if (gy % majorGrid === 0) continue;
 
   const [, sy] = worldToScreen(startWX, gy);
+  const label = (gy).toFixed(0);
 
-  const label = (gy).toFixed(0); // ✅ FIXED SCALE
-
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+  ctx.strokeStyle = 'rgba(20, 10, 5, 0.6)';
   ctx.lineWidth = 2;
   ctx.strokeText(label, 30, sy - 2);
 
-  ctx.fillStyle = 'rgba(228, 13, 235, 0.6)';
+  ctx.fillStyle = 'rgba(42, 201, 42, 0.8)';
   ctx.fillText(label, 30, sy - 2);
 }
 
